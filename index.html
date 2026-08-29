@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Portfolio Soudaysse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060e18; --panel:#0c1c2e; --panel-2:#0f2338; --line:#17324f;
+    --ink:#eaf3f8; --muted:#8aa2b8; --muted-2:#5d7690;
+    --accent:#4fd1c5; --ok:#3ddc84; --warn:#ffb454; --err:#ff6767;
+    --font-display:'Space Grotesk', sans-serif; --font-body:'IBM Plex Sans', sans-serif; --font-mono:'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--font-body); min-height:100vh;
+    display:flex; align-items:flex-start; justify-content:center; padding:40px 16px;
+  }
+  a{color:var(--accent);}
+  .wrap{width:100%; max-width:560px;}
+  h1{font-family:var(--font-display); font-size:22px; margin-bottom:6px;}
+  .sub{color:var(--muted); font-size:13px; margin-bottom:28px; font-family:var(--font-mono);}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:24px; margin-bottom:20px;}
+  label{display:block; font-family:var(--font-mono); font-size:12px; color:var(--muted); margin:14px 0 6px;}
+  label:first-child{margin-top:0;}
+  input, textarea{
+    width:100%; background:var(--panel-2); border:1px solid var(--line); color:var(--ink);
+    padding:10px 12px; border-radius:7px; font-family:var(--font-body); font-size:14px;
+  }
+  textarea{resize:vertical; min-height:70px;}
+  input:focus, textarea:focus{outline:none; border-color:var(--accent);}
+  button{
+    font-family:var(--font-mono); font-size:13px; padding:10px 18px; border-radius:7px;
+    border:1px solid var(--line); background:none; color:var(--ink); cursor:pointer; margin-top:14px;
+  }
+  button.primary{background:var(--accent); color:#04141a; border-color:var(--accent); font-weight:600;}
+  button:hover{opacity:.85;}
+  .msg{font-family:var(--font-mono); font-size:12.5px; margin-top:12px; padding:10px 12px; border-radius:6px; display:none;}
+  .msg.show{display:block;}
+  .msg.ok{background:rgba(61,220,132,.1); color:var(--ok); border:1px solid rgba(61,220,132,.3);}
+  .msg.err{background:rgba(255,103,103,.1); color:var(--err); border:1px solid rgba(255,103,103,.3);}
+  .msg.info{background:rgba(255,180,84,.08); color:var(--warn); border:1px solid rgba(255,180,84,.3);}
+  .doc-row{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px dashed var(--line); font-size:13.5px;}
+  .doc-row:last-child{border-bottom:none;}
+  .doc-row .name{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .doc-row button{margin:0; padding:5px 10px; font-size:11px; border-color:var(--err); color:var(--err);}
+  #panel{display:none;}
+  #login{max-width:380px; margin:0 auto;}
+  .hint{color:var(--muted-2); font-size:11.5px; margin-top:6px; font-family:var(--font-mono); line-height:1.5;}
+  .top-row{display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;}
+  .logout{font-family:var(--font-mono); font-size:12px; color:var(--muted); cursor:pointer; background:none; border:none; padding:0; margin:0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ================= ÉCRAN DE CONNEXION ================= -->
+  <div id="login">
+    <h1>Administration</h1>
+    <p class="sub">Portfolio Soudaysse</p>
+    <div class="card">
+      <label for="u">Identifiant</label>
+      <input id="u" autocomplete="username">
+      <label for="p">Mot de passe</label>
+      <input id="p" type="password" autocomplete="current-password">
+      <button class="primary" onclick="doLogin()" style="width:100%;">Se connecter</button>
+      <div class="msg err" id="loginMsg"></div>
+    </div>
+  </div>
+
+  <!-- ================= PANNEAU ADMIN ================= -->
+  <div id="panel">
+    <div class="top-row">
+      <div>
+        <h1>Administration</h1>
+        <p class="sub">Portfolio Soudaysse</p>
+      </div>
+      <button class="logout" onclick="logout()">se déconnecter</button>
+    </div>
+
+    <div class="card">
+      <strong>Connexion GitHub</strong>
+      <p class="hint">Nécessaire pour que les modifications soient réellement enregistrées sur ton site. Ton jeton n'est jamais écrit dans le code — il reste seulement dans cet onglet et disparaît quand tu le fermes.</p>
+      <label for="repo">Dépôt (format : pseudo/nom-du-depot)</label>
+      <input id="repo" placeholder="ex: soudaysse/portfolio-soudaysse">
+      <label for="branch">Branche</label>
+      <input id="branch" value="main">
+      <label for="token">Jeton d'accès personnel GitHub (PAT)</label>
+      <input id="token" type="password" placeholder="ghp_...">
+      <p class="hint">Créer un jeton : github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens → limite-le à ce seul dépôt, permission "Contents: Read and write" uniquement.</p>
+    </div>
+
+    <div class="card">
+      <strong>Textes du site</strong>
+      <label for="status_text">Badge de statut</label>
+      <input id="status_text">
+      <label for="tagline">Accroche sous le nom</label>
+      <input id="tagline">
+      <label for="lede">Texte de présentation</label>
+      <textarea id="lede"></textarea>
+      <button class="primary" onclick="saveSiteText()">Enregistrer sur GitHub</button>
+      <div class="msg" id="siteMsg"></div>
+    </div>
+
+    <div class="card">
+      <strong>Documents (PDF)</strong>
+      <div id="docsList" style="margin-top:10px;"></div>
+      <label for="docTitle">Titre du nouveau document</label>
+      <input id="docTitle" placeholder="ex: Fiche projet réseau">
+      <label for="docDate">Date / info (optionnel)</label>
+      <input id="docDate" placeholder="ex: Septembre 2026">
+      <label for="docFile">Fichier PDF</label>
+      <input id="docFile" type="file" accept="application/pdf">
+      <button class="primary" onclick="addDocument()">Ajouter et envoyer sur GitHub</button>
+      <div class="msg" id="docMsg"></div>
+    </div>
+
+    <p class="hint" style="text-align:center;">Après une sauvegarde, la mise à jour est visible sur le site en 1 à 2 minutes (le temps que GitHub Pages / Netlify redéploie).</p>
+  </div>
+</div>
+
+<script>
+  // ---- Écran de connexion (verrou d'accès à l'interface — la vraie sécurité vient du jeton GitHub ci-dessus) ----
+  const ADMIN_USER = "admin";
+  const ADMIN_PASS = "Soudesdes215&";
+
+  function doLogin(){
+    const u = document.getElementById('u').value;
+    const p = document.getElementById('p').value;
+    const msg = document.getElementById('loginMsg');
+    if (u === ADMIN_USER && p === ADMIN_PASS){
+      sessionStorage.setItem('admin_ok', '1');
+      showPanel();
+    } else {
+      msg.textContent = "Identifiant ou mot de passe incorrect.";
+      msg.classList.add('show');
+    }
+  }
+  function logout(){
+    sessionStorage.removeItem('admin_ok');
+    location.reload();
+  }
+  function showPanel(){
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('panel').style.display = 'block';
+    loadCurrentContent();
+  }
+  if (sessionStorage.getItem('admin_ok') === '1') showPanel();
+
+  // ---- Aide GitHub Contents API ----
+  function ghConfig(){
+    return {
+      repo: document.getElementById('repo').value.trim(),
+      branch: document.getElementById('branch').value.trim() || 'main',
+      token: document.getElementById('token').value.trim()
+    };
+  }
+  async function ghGetFile(path){
+    const { repo, branch, token } = ghConfig();
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}?ref=${branch}`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' }
+    });
+    if (res.status === 404) return { sha: null, json: null };
+    if (!res.ok) throw new Error(`Lecture de ${path} impossible (${res.status})`);
+    const data = await res.json();
+    const content = decodeURIComponent(escape(atob(data.content)));
+    return { sha: data.sha, json: JSON.parse(content) };
+  }
+  async function ghPutJSON(path, obj, sha, message){
+    const { repo, branch, token } = ghConfig();
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(obj, null, 2))));
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' },
+      body: JSON.stringify({ message, content, branch, ...(sha ? { sha } : {}) })
+    });
+    if (!res.ok) throw new Error(`Écriture de ${path} refusée (${res.status})`);
+    return res.json();
+  }
+  async function ghPutFileBase64(path, base64Content, message){
+    const { repo, branch, token } = ghConfig();
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' },
+      body: JSON.stringify({ message, content: base64Content, branch })
+    });
+    if (!res.ok) throw new Error(`Envoi du fichier ${path} refusé (${res.status})`);
+    return res.json();
+  }
+  function showMsg(id, text, type){
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = `msg show ${type}`;
+  }
+
+  // ---- Charger le contenu actuel (best-effort, sans jeton on tente en lecture publique) ----
+  async function loadCurrentContent(){
+    try {
+      const site = await fetch('../data/site.json').then(r => r.json());
+      document.getElementById('status_text').value = site.status_text || '';
+      document.getElementById('tagline').value = site.tagline || '';
+      document.getElementById('lede').value = site.lede || '';
+    } catch(e) {}
+    renderDocsList();
+  }
+  let cachedDocs = null;
+  async function renderDocsList(){
+    try {
+      const data = await fetch('../data/documents.json').then(r => r.json());
+      cachedDocs = data.body || [];
+    } catch(e) { cachedDocs = []; }
+    const list = document.getElementById('docsList');
+    if (!cachedDocs.length){ list.innerHTML = '<p class="hint">Aucun document pour le moment.</p>'; return; }
+    list.innerHTML = cachedDocs.map((d,i) => `
+      <div class="doc-row">
+        <span class="name">${d.title} ${d.date ? '· ' + d.date : ''}</span>
+        <button onclick="removeDocument(${i})">Retirer</button>
+      </div>
+    `).join('');
+  }
+
+  // ---- Enregistrer les textes du site ----
+  async function saveSiteText(){
+    const msg = 'siteMsg';
+    if (!ghConfig().repo || !ghConfig().token){ showMsg(msg, "Renseigne le dépôt et le jeton GitHub d'abord.", 'err'); return; }
+    try {
+      showMsg(msg, "Envoi en cours…", 'info');
+      const current = await ghGetFile('data/site.json').catch(() => ({ sha: null }));
+      const updated = {
+        status_text: document.getElementById('status_text').value,
+        tagline: document.getElementById('tagline').value,
+        lede: document.getElementById('lede').value
+      };
+      await ghPutJSON('data/site.json', updated, current.sha, 'Mise à jour des textes du site (admin)');
+      showMsg(msg, "Enregistré sur GitHub ✓", 'ok');
+    } catch(e){ showMsg(msg, "Erreur : " + e.message, 'err'); }
+  }
+
+  // ---- Ajouter un document PDF ----
+  async function addDocument(){
+    const msg = 'docMsg';
+    const title = document.getElementById('docTitle').value.trim();
+    const date = document.getElementById('docDate').value.trim();
+    const fileInput = document.getElementById('docFile');
+    if (!ghConfig().repo || !ghConfig().token){ showMsg(msg, "Renseigne le dépôt et le jeton GitHub d'abord.", 'err'); return; }
+    if (!title || !fileInput.files.length){ showMsg(msg, "Titre et fichier PDF requis.", 'err'); return; }
+    const file = fileInput.files[0];
+    try {
+      showMsg(msg, "Envoi du PDF en cours…", 'info');
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const path = `documents/${Date.now()}_${safeName}`;
+      await ghPutFileBase64(path, base64, `Ajout du document : ${title}`);
+
+      const current = await ghGetFile('data/documents.json').catch(() => ({ sha: null, json: { body: [] } }));
+      const list = (current.json && current.json.body) || [];
+      list.push({ title, file: path, date });
+      await ghPutJSON('data/documents.json', { body: list }, current.sha, `Mise à jour de la liste des documents : ${title}`);
+
+      showMsg(msg, "Document ajouté ✓ (visible sur le site après redéploiement)", 'ok');
+      fileInput.value = ''; document.getElementById('docTitle').value=''; document.getElementById('docDate').value='';
+      renderDocsList();
+    } catch(e){ showMsg(msg, "Erreur : " + e.message, 'err'); }
+  }
+
+  async function removeDocument(index){
+    const msg = 'docMsg';
+    if (!ghConfig().repo || !ghConfig().token){ showMsg(msg, "Renseigne le dépôt et le jeton GitHub d'abord.", 'err'); return; }
+    try {
+      showMsg(msg, "Mise à jour en cours…", 'info');
+      const current = await ghGetFile('data/documents.json');
+      const list = (current.json && current.json.body) || [];
+      list.splice(index, 1);
+      await ghPutJSON('data/documents.json', { body: list }, current.sha, 'Retrait d\'un document (admin)');
+      showMsg(msg, "Document retiré ✓", 'ok');
+      renderDocsList();
+    } catch(e){ showMsg(msg, "Erreur : " + e.message, 'err'); }
+  }
+</script>
+</body>
+</html>
